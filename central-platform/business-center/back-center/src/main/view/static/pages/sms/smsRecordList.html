@@ -1,0 +1,118 @@
+<!-- 短信记录列表 -->
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">短信记录</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>短信记录</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            搜索：
+            <select id="smsRecord-search-key" lay-filter="itpow">
+                <option value="">-请选择-</option>
+                <option value="sysName">系统名称</option>
+                <option value="phone">手机号</option>
+                <option value="content">短信内容</option>
+                <option value="ipAddress">IP地址</option>
+                <option value="sendTime">发送时间</option>
+            </select>&emsp;
+            <input id="smsRecord-search-value" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <input id="smsRecord-search-star" class="layui-input search-input" type="text" placeholder="输入开始时间" style="display: none"/>
+            <input id="smsRecord-search-end" class="layui-input search-input" type="text" placeholder="输入结束时间" style="display: none"/>
+            <button id="smsRecord-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+        </div>
+
+        <table class="layui-table" id="smsRecord-table" lay-filter="smsRecord-table"></table>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="smsRecord-table-bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">查看</a>
+</script>
+<script>
+    layui.use(['form', 'table', 'util', 'config', 'admin', 'formSelects'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        var layer = layui.layer;
+        var util = layui.util;
+        var admin = layui.admin;
+        var formSelects = layui.formSelects;
+        // 渲染表格
+        table.render({
+            elem: '#smsRecord-table',
+            url: config.base_server + 'api-sms/smsRecords',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {field: 'sysName', sort: true, title: '系统名称'},
+                {field: 'userCode', sort: true, title: '系统编码'},
+                {field: 'phone', sort: true, title: '手机号'},
+                {field: 'content', sort: true, title: '短信内容'},
+                {sort: true, title: '发送状态',templet:function (d) {
+                        return d.status==1?"有效":"无效"
+                    }},
+                {field: 'ipAddress', sort: true, title: 'Ip地址'},
+                {
+                    sort: true, templet: function (d) {
+                        return util.toDateString(d.sendTime);
+                    }, title: '发送时间'
+                },
+                {align: 'center', toolbar: '#smsRecord-table-bar', title: '操作'}
+            ]]
+        });
+
+        // 工具条点击事件
+        table.on('tool(smsRecord-table)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') { //修改
+                showEditModel(data);
+            }
+        });
+
+        //显示表单弹窗
+        var showEditModel = function (data) {
+            if (data){
+                data.status = data.status.toString();
+            }
+            admin.putTempData('t_smsRecords', data);
+            var title = '查看信息';
+            admin.popupCenter({
+                title: title,
+                //area: ['880px', '800px'],
+                path: 'pages/sms/smsRecordForm.html',
+                finish: function () {
+                    table.reload('smsRecord-table', {});
+                }
+            });
+        };
+
+        // 搜索按钮点击事件
+        $('#smsRecord-btn-search').click(function () {
+            var key = $('#smsRecord-search-key').val();
+            var value = $('#smsRecord-search-value').val();
+            table.reload('smsRecord-table', {where: {searchKey: key, searchValue: value}});
+        });
+        //选择下拉框时触发
+        formSelects.onChange(
+            function (){
+                var key = $('#smsRecord-search-key').val();
+                alert(key);
+                if(key=='sendTime'){
+                    $('#smsRecord-search-value').css('display','none');
+                    $('#smsRecord-search-star').css('display','block');
+                    $('#smsRecord-search-end').css('display','block');
+                }else{
+                    $('#smsRecord-search-value').css('display','block');
+                    $('#smsRecord-search-star').css('display','none');
+                    $('#smsRecord-search-end').css('display','none');
+                }
+            }
+        );
+    });
+</script>

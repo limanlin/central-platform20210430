@@ -1,0 +1,154 @@
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">订单管理</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>订单管理</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            搜索：
+            <select id="order-search-key">
+                <option value="">-请选择-</option>
+                <option value="orderNumber">订单号</option>
+            </select>&emsp;
+            <input id="order-search-value" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <button id="order-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+            <button id="order-btn-add" class="layui-btn icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>
+            <button id="order-btn-export" class="layui-btn icon-btn"><i class="layui-icon">&#xe601;</i>导出</button>
+        </div>
+
+        <table class="layui-table" id="order-table" lay-filter="order-table"></table>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="order-table-bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+    layui.use(['form', 'table', 'util', 'config', 'admin'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        var layer = layui.layer;
+        var util = layui.util;
+        var admin = layui.admin;
+
+        // 渲染表格
+        table.render({
+            elem: '#order-table',
+            url: config.base_server + 'api-order/orders',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {type: 'numbers'},
+                {field: 'status', sort: true, title: '订单状态'},
+                {field: 'orderNumber', sort: true, title: '订单编号'},
+                {field: 'orderUserId', sort: true, title: '下单人id'},
+                {
+                    sort: true, templet: function (d) {
+                        return util.toDateString(d.orderTime);
+                    }, title: '下单时间'
+                },
+                {field: 'outUserId', sort: true, title: '发货人id'},
+                {
+                    sort: true, templet: function (d) {
+                        return util.toDateString(d.outTime);
+                    }, title: '发货时间'
+                },
+                {align: 'center', toolbar: '#order-table-bar', title: '操作'}
+            ]]
+        });
+
+        // 添加按钮点击事件
+        $('#order-btn-add').click(function () {
+            showEditModel();
+        });
+
+        // 工具条点击事件
+        table.on('tool(order-table)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if (layEvent === 'edit') { // 修改
+                showEditModel(data);
+            }else if (layEvent === 'del') {
+                layer.confirm('确定删除此订单吗？', function () {
+                    layer.load(2);
+
+                    admin.req('api-user/menus/'+obj.data.id, {}, function (data) {
+                        layer.closeAll('loading');
+                        if (0 == data.resp_code) {
+                            layer.msg(data.resp_msg, {icon: 1});
+                            renderTable();
+                        } else {
+                            layer.msg(data.resp_msg, {icon: 2});
+                        }
+                    }, 'DELETE');
+
+                });
+            }
+        });
+
+        //显示表单弹窗
+        var showEditModel = function (data) {
+            admin.putTempData('t_order', data);
+            var title = data ? '修改用户' : '添加用户';
+            admin.popupCenter({
+                title: title,
+                path: 'pages/order/order_form.html',
+                finish: function () {
+                    table.reload('order-table', {});
+                }
+            });
+        };
+
+        // 搜索按钮点击事件
+        $('#order-btn-search').click(function () {
+            var key = $('#order-search-key').val();
+            var value = $('#order-search-value').val();
+            table.reload('order-table', {where: {searchKey: key, searchValue: value}});
+        });
+
+
+        // 导出
+        $('#order-btn-export').click(function () {
+            var url = config.base_server + 'api-order/orders/exportOrder?access_token='+config.getToken().access_token;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.responseType = "blob";
+            xhr.setRequestHeader("client_type", "DESKTOP_WEB");
+            xhr.onload = function() {
+                if (this.status == 200) {
+                    var blob = this.response;
+                    var objecturl = URL.createObjectURL(blob);
+                    window.location.href = objecturl;
+                }
+            }
+            xhr.send();
+        });
+
+        // 修改user状态
+        form.on('switch(order-tpl-state)', function (obj) {
+            layer.load(2);
+            admin.req('api-order/orders/updateEnabled', {
+                id: obj.elem.value,
+                enabled: obj.elem.checked ? true : false
+            }, function (data) {
+                layer.closeAll('loading');
+                if (data.resp_code == 0) {
+                    layer.msg(data.resp_msg, {icon: 1});
+                    //table.reload('table-user', {});
+                } else {
+                    layer.msg(data.resp_msg, {icon: 2});
+                    $(obj.elem).prop('checked', !obj.elem.checked);
+                    form.render('checkbox');
+                }
+            }, 'GET');
+        });
+    });
+</script>

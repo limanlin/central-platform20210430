@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.central.dao.LevelDao">
+
+    <update id="update">
+        update xlkj_level
+        <set>
+            <if test="leveLcode != null and leveLcode != ''">
+                level_code = #{leveLcode,jdbcType=INTEGER},
+            </if>
+            <if test="levelName != null and levelName != ''">
+                level_name = #{levelName,jdbcType=VARCHAR},
+            </if>
+            <if test="sortNo != null and sortNo != ''">
+                sort_no = #{sortNo,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <sql id="where">
+        <where>
+            <if test="id != null and id != ''">
+                and t.id = #{id}
+            </if>
+            <if test="leveLcode != null and leveLcode != ''">
+                and t.level_code = #{leveLcode}
+            </if>
+            <if test="levelName != null and levelName != ''">
+                and t.level_name = #{levelName}
+            </if>
+            <if test="sortNo != null and sortNo != ''">
+                and t.sort_no = #{sortNo}
+            </if>
+
+
+            <!-- 搜索条件 -->
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='level_name'">
+                and t.level_name  like concat('%', #{searchValue}, '%')
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='level_code'">
+                and t.level_code = #{searchValue}
+            </if>
+        </where>
+    </sql>
+    <select id="count" resultType="int">
+        select count(*) from xlkj_level t
+        <include refid="where" />
+    </select>
+
+    <select id="findList" resultType="com.central.model.xolokongjia.Level">
+        select * from xlkj_level t
+        <include refid="where" />
+        order by t.sort_no
+
+        <if test="page != null and page >= 0 and limit != null and limit > 0">
+            limit #{page},#{limit}
+        </if>
+    </select>
+</mapper>

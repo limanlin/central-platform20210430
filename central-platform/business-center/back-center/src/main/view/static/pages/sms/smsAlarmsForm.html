@@ -1,0 +1,54 @@
+<!-- 短信记录表单弹窗 -->
+<form id="smsAlarm-form" lay-filter="smsAlarm-form" class="layui-form model-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">系统名称</label>
+        <div class="layui-input-block">
+            <input name="sysName" type="text" class="layui-input" maxlength="128" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">系统编码</label>
+        <div class="layui-input-block">
+            <input name="userCode" type="text" class="layui-input" maxlength="128" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">手机号</label>
+        <div class="layui-input-block">
+            <input name="phone" type="text" class="layui-input" maxlength="128" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">IP地址</label>
+        <div class="layui-input-block">
+            <input name="ipAddress" type="text" class="layui-input" maxlength="128" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">警告时间</label>
+        <div class="layui-input-block">
+            <input name="operatdate" type="text" class="layui-input" maxlength="128" />
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">短信内容</label>
+        <div class="layui-input-block">
+            <textarea name="smsContent" class="layui-textarea" maxlength="500"></textarea>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['layer', 'admin', 'form', 'formSelects'],function () {
+        var admin = layui.admin;
+        var form = layui.form;
+        // 回显dictionary数据
+        var smsAlarms = admin.getTempData('t_smsAlarms');
+        console.log(smsAlarms);
+        $('#smsAlarm-form').attr('method', 'POST');
+        if (smsAlarms) {
+            form.val('smsAlarm-form', smsAlarms);
+            $('#smsAlarm-form').attr('method', 'POST');
+        }
+    });
+</script>

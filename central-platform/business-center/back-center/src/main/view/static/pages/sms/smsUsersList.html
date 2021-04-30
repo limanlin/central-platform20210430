@@ -1,0 +1,141 @@
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">短信系统</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>短信系统</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            搜索：
+            <select id="smsUser-search-key">
+                <option value="">-请选择-</option>
+                <option value="sysName">系统名称</option>
+                <option value="userName">用户名</option>
+                <option value="productid">短信产品</option>
+                <option value="remark">备注</option>
+            </select>&emsp;
+            <input id="smsUser-search-value" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <button id="smsUser-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+            <button id="smsUser-btn-add" class="layui-btn icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>
+        </div>
+
+        <table class="layui-table" id="smsUser-table" lay-filter="smsUser-table"></table>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="smsUser-table-bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<!-- 表格状态列 -->
+<script type="text/html" id="smsUser-tpl-state">
+    <input type="checkbox" lay-filter="smsUser-tpl-state" value="{{d.id}}" lay-skin="switch" lay-text="关闭|启用"
+           {{d.enabled==1?'checked':''}}/>
+</script>
+<script>
+    layui.use(['form', 'table', 'util', 'config', 'admin'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        var layer = layui.layer;
+        var util = layui.util;
+        var admin = layui.admin;
+        // 渲染表格
+        table.render({
+            elem: '#smsUser-table',
+            url: config.base_server + 'api-sms/smsUsers',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {type: 'numbers'},
+                {field: 'id', sort: true, title: 'ID'},
+                {field: 'sysName', sort: true, title: '系统名称'},
+                {field: 'userCode', sort: true, title: '系统编码'},
+                {field: 'userName', sort: true, title: '用户名'},
+                {field: 'password', sort: true, title: '密码'},
+                {field: 'productid', sort: true, title: '短信产品'},
+                {field: 'xh', sort: true, title: '短信型号'},
+                {field: 'suffix', sort: true, title: '短信后缀'},
+                {field: 'alarmNum', sort: true, title: '预警值'},
+                {field: 'intervalTime', sort: true, title: '预警间隔(分)'},
+                {field: 'remark', sort: true, title: '备注'},
+                {
+                    sort: true, templet: function (d) {
+                        return util.toDateString(d.createTime);
+                    }, title: '创建时间'
+                },
+                {
+                    sort: true, templet: function (d) {
+                        return util.toDateString(d.updateTime);
+                    }, title: '修改时间'
+                },
+                {field: 'enabled', sort: true, templet: '#smsUser-tpl-state', title: '是否启用'},
+                {align: 'center', toolbar: '#smsUser-table-bar', title: '操作'}
+            ]]
+            ,done: function () {
+                $("[data-field='id']").css('display','none');
+            }
+        });
+
+        // 添加按钮点击事件
+        $('#smsUser-btn-add').click(function () {
+            showEditModel();
+        });
+
+        // 工具条点击事件
+        table.on('tool(smsUser-table)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') { //修改
+                showEditModel(data);
+            } else if (obj.event === 'del') { //删除
+                doDelete(obj);
+            }
+        });
+
+        // 删除
+        var doDelete = function (obj) {
+            layer.confirm('确定要删除吗？', function (i) {
+                layer.close(i);
+                layer.load(2);
+                admin.req('api-sms/smsUsers/' + obj.data.id, {}, function (data) {
+                    layer.closeAll('loading');
+                    if (data.resp_code == 0) {
+                        layer.msg(data.resp_msg, {icon: 1});
+                        obj.del();
+                    } else {
+                        layer.msg(data.resp_msg, {icon: 2});
+                    }
+                }, 'DELETE');
+            });
+        };
+
+        //显示表单弹窗
+        var showEditModel = function (data) {
+            if (data){
+                data.enabled = data.enabled.toString();
+            }
+            admin.putTempData('t_smsUsers', data);
+            var title = data ? '修改信息' : '添加信息';
+            admin.popupCenter({
+                title: title,
+                area: ['950px', '800px'],
+                path: 'pages/sms/smsUsersForm.html',
+                finish: function () {
+                    table.reload('smsUser-table', {});
+                }
+            });
+        };
+
+        // 搜索按钮点击事件
+        $('#smsUser-btn-search').click(function () {
+            var key = $('#smsUser-search-key').val();
+            var value = $('#smsUser-search-value').val();
+            table.reload('smsUser-table', {where: {searchKey: key, searchValue: value}});
+        });
+    });
+</script>

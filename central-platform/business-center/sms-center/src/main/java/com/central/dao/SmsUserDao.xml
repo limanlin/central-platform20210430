@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.central.dao.SmsUserDao">
+
+    <update id="update">
+        update sms_user
+        <set>
+            <if test="sysName != null and sysName != ''">
+                sysName = #{sysName,jdbcType=VARCHAR},
+            </if>
+            <if test="userCode != null and userCode != ''">
+                userCode = #{userCode,jdbcType=VARCHAR},
+            </if>
+            <if test="userName != null and userName != ''">
+                userName = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null and password!=''">
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="productid != null and productid!=''">
+                productid = #{productid,jdbcType=VARCHAR},
+            </if>
+            <if test="xh != null and xh!=''">
+                xh = #{xh,jdbcType=VARCHAR},
+            </if>
+            <if test="enabled != null">
+                enabled = #{enabled,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="daySendNum != null">
+                daySendNum = #{daySendNum,jdbcType=INTEGER},
+            </if>
+            <if test="ipDaySendNum != null">
+                ipDaySendNum = #{ipDaySendNum,jdbcType=INTEGER},
+            </if>
+            <if test="telDaySendNum != null">
+                telDaySendNum = #{telDaySendNum,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                createTime = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                updateTime = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="suffix != null and suffix != ''">
+                suffix = #{suffix,jdbcType=VARCHAR},
+            </if>
+            <if test="alarmNum != null and alarmNum != ''">
+                alarmNum = #{alarmNum,jdbcType=INTEGER},
+            </if>
+            <if test="intervalTime != null and intervalTime != ''">
+                intervalTime = #{intervalTime,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <sql id="where">
+        <where>
+            <if test="id != null and id != ''">
+                and t.id = #{id}
+            </if>
+            <if test="sysName != null and sysName != ''">
+                and t.sysName like concat('%', #{sysName}, '%')
+            </if>
+            <if test="userCode != null and userCode != ''">
+                and t.userCode = #{userCode}
+            </if>
+            <if test="userName != null and userName != ''">
+                and t.userName like concat('%', #{userName}, '%')
+            </if>
+            <if test="productid != null and productid != ''">
+                and t.productid = #{productid}
+            </if>
+            <if test="enabled != null and enabled != ''">
+                and t.enabled = #{enabled}
+            </if>
+            <if test="suffix != null and suffix != ''">
+                and t.enabled = #{enabled}
+            </if>
+
+            <!-- 搜索条件 -->
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='userName'">
+                and t.userName  like concat('%', #{searchValue}, '%')
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='suffix'">
+                and t.suffix  like concat('%', #{searchValue}, '%')
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='sysName'">
+                and t.sysName  like concat('%', #{searchValue}, '%')
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='userCode'">
+                and t.userCode = #{searchValue}
+            </if>
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='enabled'">
+                and t.enabled = #{searchValue}
+            </if>
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='productid'">
+                and t.productid = #{searchValue}
+            </if>
+
+        </where>
+    </sql>
+    <select id="count" resultType="int">
+        select count(*) from sms_user t
+        <include refid="where" />
+    </select>
+
+    <select id="findList" resultType="com.central.model.sms.SmsUser">
+        select * from sms_user t
+        <include refid="where" />
+        order by t.id desc
+
+        <if test="page != null and page >= 0 and limit != null and limit > 0">
+            limit #{page},#{limit}
+        </if>
+    </select>
+</mapper>

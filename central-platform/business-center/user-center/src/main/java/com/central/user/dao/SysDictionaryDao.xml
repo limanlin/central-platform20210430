@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.central.user.dao.SysDictionaryDao">
+
+    <update id="update">
+        update sys_dictionary
+        <set>
+            <if test="valueCode != null and valueCode != ''">
+                valueCode = #{valueCode,jdbcType=VARCHAR},
+            </if>
+            <if test="valueName != null and valueName != ''">
+                valueName = #{valueName,jdbcType=VARCHAR},
+            </if>
+            <if test="typeCode != null and typeCode != ''">
+                typeCode = #{typeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="typeName != null and typeName != ''">
+                typeName = #{typeName,jdbcType=VARCHAR},
+            </if>
+            <if test="sortNum != null">
+                sortNum = #{sortNum,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <sql id="where">
+        <where>
+            <if test="id != null and id != ''">
+                and t.id = #{id}
+            </if>
+            <if test="valueCode != null and valueCode != ''">
+                and t.valueCode = #{valueCode}
+            </if>
+            <if test="valueName != null and valueName != ''">
+                and t.valueName like concat('%', #{valueName}, '%')
+            </if>
+            <if test="typeCode != null and typeCode != ''">
+                and t.typeCode like concat('%', #{typeCode}, '%')
+            </if>
+            <if test="typeName != null and typeName != ''">
+                and t.typeName like concat('%', #{typeName}, '%')
+            </if>
+            <!-- 搜索条件 -->
+            <if test="searchKey != null and searchKey != '' and searchKey=='valueCode'">
+                and t.valueCode  like concat('%', #{searchValue}, '%')
+            </if>
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='valueName'">
+                and t.valueName  like concat('%', #{searchValue}, '%')
+            </if>
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='typeCode'">
+                and t.typeCode  like concat('%', #{searchValue}, '%')
+            </if>
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='typeName'">
+                and t.typeName  like concat('%', #{searchValue}, '%')
+            </if>
+
+        </where>
+    </sql>
+    <select id="count" resultType="int">
+        select count(*) from sys_dictionary t
+        <include refid="where" />
+    </select>
+
+    <select id="findList" resultType="com.central.model.user.SysDictionary">
+        select * from sys_dictionary t
+        <include refid="where" />
+        order by t.id desc
+
+        <if test="page != null and page >= 0 and limit != null and limit > 0">
+            limit #{page},#{limit}
+        </if>
+    </select>
+</mapper>

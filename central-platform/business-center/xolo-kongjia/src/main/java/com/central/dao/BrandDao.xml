@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.central.dao.BrandDao">
+
+    <update id="update">
+        update xlkj_brand
+        <set>
+            <if test="brandCode != null and brandCode != ''">
+                brand_code = #{brandCode,jdbcType=INTEGER},
+            </if>
+            <if test="brandName != null and brandName != ''">
+                brand_name = #{brandName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <sql id="where">
+        <where>
+            <if test="id != null and id != ''">
+                and t.id = #{id}
+            </if>
+            <if test="brandCode != null and brandCode != ''">
+                and t.brand_code = #{brandCode}
+            </if>
+            <if test="brandName != null and brandName != ''">
+                and t.brand_name = #{brandName}
+            </if>
+
+
+            <!-- 搜索条件 -->
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='brand_name'">
+                and t.brand_name  like concat('%', #{searchValue}, '%')
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='brand_code'">
+                and t.brand_code = #{searchValue}
+            </if>
+        </where>
+    </sql>
+    <select id="count" resultType="int">
+        select count(*) from xlkj_brand t
+        <include refid="where" />
+    </select>
+
+    <select id="findList" resultType="com.central.model.xolokongjia.Brand">
+        select * from xlkj_brand t
+        <include refid="where" />
+        order by t.id desc
+
+        <if test="page != null and page >= 0 and limit != null and limit > 0">
+            limit #{page},#{limit}
+        </if>
+    </select>
+</mapper>

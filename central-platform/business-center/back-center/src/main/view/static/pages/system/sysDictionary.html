@@ -1,0 +1,118 @@
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">数据字典</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>数据字典</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            搜索：
+            <select id="dictionary-search-key">
+                <option value="">-请选择-</option>
+                <option value="valueCode">字典值</option>
+                <option value="valueName">显示值</option>
+                <option value="typeCode">字典编码</option>
+                <option value="typeName">字典名称</option>
+            </select>&emsp;
+            <input id="dictionary-search-value" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <button id="dictionary-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+            <button id="dictionary-btn-add" class="layui-btn icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>
+        </div>
+
+        <table class="layui-table" id="dictionary-table" lay-filter="dictionary-table"></table>
+    </div>
+</div>
+
+
+<!-- 表格操作列 -->
+<script type="text/html" id="dictionary-table-bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    layui.use(['form', 'table', 'util', 'config', 'admin'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        var layer = layui.layer;
+        var util = layui.util;
+        var admin = layui.admin;
+
+        // 渲染表格
+        table.render({
+            elem: '#dictionary-table',
+            url: config.base_server + 'api-user/SysDictionarys/sysDictionarys',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {type: 'numbers',title:'序号'},
+                {field: 'id', sort: true, title: '字典表id'},
+                {field: 'valueCode', sort: true, title: '字典值'},
+                {field: 'valueName', sort: true, title: '显示值'},
+                {field: 'typeCode', sort: true, title: '字典编码'},
+                {field: 'typeName', sort: true, title: '字典名称'},
+                {field: 'sortNum', sort: true, title: '字典排序'},
+                {align: 'center', toolbar: '#dictionary-table-bar', title: '操作'}
+            ]]
+            ,done: function () {
+                $("[data-field='id']").css('display','none');
+            }
+        });
+
+        // 添加按钮点击事件
+        $('#dictionary-btn-add').click(function () {
+            showEditModel();
+        });
+
+        //显示表单弹窗
+        var showEditModel = function (data) {
+            admin.putTempData('t_dictionary', data);
+            var title = data ? '修改数据字典' : '添加数据字典';
+            admin.popupCenter({
+                title: title,
+                path: 'pages/system/sysDictionary_form.html',
+                finish: function () {
+                    table.reload('dictionary-table', {});
+                }
+            });
+        };
+        // 工具条点击事件
+        table.on('tool(dictionary-table)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') { //修改
+                showEditModel(data);
+            } else if (obj.event === 'del') { //删除
+                doDelete(obj);
+            }
+        });
+
+        // 删除
+        var doDelete = function (obj) {
+            layer.confirm('确定要删除吗？', function (i) {
+                layer.close(i);
+                layer.load(2);
+                admin.req('api-user/SysDictionarys/' + obj.data.id, {}, function (data) {
+                    layer.closeAll('loading');
+                    if (data.resp_code == 0) {
+                        layer.msg(data.resp_msg, {icon: 1});
+                        obj.del();
+                    } else {
+                        layer.msg(data.resp_msg, {icon: 2});
+                    }
+                }, 'DELETE');
+            });
+        };
+        // 搜索按钮点击事件
+        $('#dictionary-btn-search').click(function () {
+            var key = $('#dictionary-search-key').val();
+            var value = $('#dictionary-search-value').val();
+            table.reload('dictionary-table', {where: {searchKey: key, searchValue: value}});
+        });
+    });
+</script>

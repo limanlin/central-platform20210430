@@ -1,0 +1,74 @@
+<!-- 数据字典弹框 -->
+<form id="sysDictionary-form" lay-filter="sysDictionary-form" class="layui-form model-form">
+    <input name="id" type="hidden"/>
+    <div class="layui-form-item">
+        <label class="layui-form-label">字典值</label>
+        <div class="layui-input-block">
+            <input name="valueCode" placeholder="请输入字典值" type="text" class="layui-input" maxlength="50"
+                   lay-verify="required" required/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">显示值</label>
+        <div class="layui-input-block">
+            <input name="valueName" placeholder="请输入显示值" type="text" class="layui-input" maxlength="50"
+                   lay-verify="required" required/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">字典编码</label>
+        <div class="layui-input-block">
+            <input name="typeCode" placeholder="请输入字典编码" type="text" class="layui-input"/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">字典名称</label>
+        <div class="layui-input-block">
+            <input name="typeName" placeholder="请输入字典名称" type="text" class="layui-input"/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">字典排序</label>
+        <div class="layui-input-block">
+            <input name="sortNum" placeholder="请输入字典排序" type="number" class="layui-input" lay-verify="required" required/>
+        </div>
+    </div>
+    <div class="layui-form-item model-form-footer">
+        <button class="layui-btn layui-btn-primary" ew-event="closeDialog" type="button">取消</button>
+        <button class="layui-btn" lay-filter="sysDictionary-form-submit" lay-submit>保存</button>
+    </div>
+</form>
+
+<script>
+    layui.use(['layer', 'admin', 'form', 'formSelects'],function () {
+        var layer = layui.layer;
+        var admin = layui.admin;
+        var form = layui.form;
+        var formSelects = layui.formSelects;
+        form.render('radio');
+        // 回显dictionary数据
+        var dictionarys = admin.getTempData('t_dictionary');
+        console.log(dictionarys);
+        $('#sysDictionary-form').attr('method', 'POST');
+        if (dictionarys) {
+            form.val('sysDictionary-form', dictionarys);
+            $('#sysDictionary-form').attr('method', 'POST');
+        }
+        // 表单提交事件
+        form.on('submit(sysDictionary-form-submit)', function (data) {
+            layer.load(2);
+            admin.req('api-user/SysDictionarys/saveOrUpdate', JSON.stringify(data.field), function (data) {
+                layer.closeAll('loading');
+                if (data.resp_code == 0) {
+                    layer.msg(data.resp_msg, {icon: 1});
+                    admin.finishPopupCenter();
+                } else {
+                    layer.msg(data.resp_msg, {icon: 2});
+                }
+            }, $('#sysDictionary-form').attr('method'));
+            return false;
+        });
+
+
+    });
+</script>

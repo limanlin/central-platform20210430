@@ -1,0 +1,101 @@
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">产品信息</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>产品信息</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            搜索：
+            <select id="product-search-key">
+                <option value="">-请选择-</option>
+                <option value="fullName">产品全称</option>
+                <option value="shortName">产品简称</option>
+                <option value="productCode">产品编码</option>
+            </select>&emsp;
+            <input id="product-search-value" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <button id="product-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+            <button id="product-btn-add" class="layui-btn icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>
+        </div>
+
+        <table class="layui-table" id="product-table" lay-filter="product-table"></table>
+    </div>
+</div>
+
+
+<!-- 表格操作列 -->
+<script type="text/html" id="product-table-bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<!-- 表格状态列 -->
+<script type="text/html" id="product-tpl-state">
+    <input type="checkbox" lay-filter="product-tpl-state" value="{{d.id}}" lay-skin="switch" lay-text="上架|下架"
+           {{d.isUse==1?'checked':''}}/>
+</script>
+
+<script>
+    layui.use(['form', 'table', 'util', 'config', 'admin'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        var layer = layui.layer;
+        var util = layui.util;
+        var admin = layui.admin;
+        // 渲染表格
+        table.render({
+            elem: '#product-table',
+            url: config.base_server + 'api-product/products',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {type: 'numbers'},
+                {field: 'id', sort: true, title: '产品ID'},
+                {field: 'fullName', sort: true, title: '产品全称'},
+                {field: 'shortName', sort: true, title: '产品简称'},
+                {field: 'brand', sort: true, title: '品牌编码'},
+                {field: 'productType', sort: true, title: '系列编码'},
+                {field: 'productCode', sort: true, title: '产品编码'},
+                {field: 'picUrl', sort: true, title: '产品图片'},
+                {field: 'price', sort: true, title: '产品原价'},
+                {field: 'salePrice', sort: true, title: '销售单价'},
+                {field: 'isUse', sort: true, templet: '#product-tpl-state', title: '是否上架'},
+                {align: 'center', toolbar: '#product-table-bar', title: '操作'}
+            ]]
+        });
+
+        // 添加按钮点击事件
+        $('#product-btn-add').click(function () {
+            showEditModel();
+        });
+        //显示表单弹窗
+        var showEditModel = function (data) {
+            //修改sex值
+            if (data){
+                data.sex = data.sex+'';
+            }
+            admin.putTempData('t_product', data);
+            var title = data ? '修改产品' : '添加产品';
+            admin.popupCenter({
+                title: title,
+                path: 'pages/product/product_form.html',
+                finish: function () {
+                    table.reload('product-table', {});
+                }
+            });
+        };
+
+        // 搜索按钮点击事件
+        $('#product-btn-search').click(function () {
+            var key = $('#product-search-key').val();
+            var value = $('#product-search-value').val();
+            table.reload('product-table', {where: {searchKey: key, searchValue: value}});
+        });
+    });
+</script>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.central.dao.SmsRequestDao">
+
+    <sql id="where">
+        <where>
+            <if test="id != null and id != ''">
+                and t.id = #{id}
+            </if>
+            <if test="phone != null and phone != ''">
+                and t.phone like concat('%', #{phone}, '%')
+            </if>
+            <if test="userName != null and userName != ''">
+                and t.userName like concat('%', #{userName}, '%')
+            </if>
+            <if test="content != null and content != ''">
+                and t.content like concat('%', #{content}, '%')
+            </if>
+            <if test="ipAddress != null and ipAddress != ''">
+                and t.ipAddress = #{ipAddress}
+            </if>
+            <if test="sendTime != null and sendTime != ''">
+                and date(t.sendTime) = curdate()
+            </if>
+
+
+            <!-- 搜索条件 -->
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='phone'">
+                and t.phone  like concat('%', #{searchValue}, '%')
+            </if>
+
+            <if test="searchKey != null and searchKey != '' and searchKey=='userName'">
+                and t.userName  like concat('%', #{searchValue}, '%')
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='content'">
+                and t.content  like concat('%', #{searchValue}, '%')
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='ipAddress'">
+                and t.ipAddress = #{searchValue}
+            </if>
+
+        </where>
+    </sql>
+
+    <select id="count" resultType="int">
+        select count(*) from sms_request t
+        <include refid="where" />
+    </select>
+
+    <select id="findList" resultType="com.central.model.sms.SmsRequest">
+        select * from sms_request t
+        <include refid="where" />
+        order by t.id desc
+
+        <if test="page != null and page >= 0 and limit != null and limit > 0">
+            limit #{page},#{limit}
+        </if>
+    </select>
+</mapper>

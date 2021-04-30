@@ -1,0 +1,54 @@
+<!-- 短信统计报表 -->
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">统计报表</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>统计报表</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            搜索：
+            <select id="smsReport-search-key" lay-filter="itpow">
+                <option value="">-请选择-</option>
+                <option value="sysName">系统名称</option>
+            </select>&emsp;
+            <input id="smsReport-search-value" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <button id="smsReport-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+        </div>
+
+        <table class="layui-table" id="smsReport-table" lay-filter="smsReport-table"></table>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table', 'config'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        // 渲染表格
+        table.render({
+            elem: '#smsReport-table',
+            url: config.base_server + 'api-sms/smsReports',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {field: 'sysName', sort: true, title: '系统名称'},
+                {field: 'userCode', sort: true, title: '系统编码'},
+                {field: 'validCount', sort: true, title: '有效数量'},
+                {field: 'invalidCount', sort: true, title: '无效数量'},
+                {field: 'alarmCount', sort: true, title: '警告次数'},
+            ]]
+        });
+        // 搜索按钮点击事件
+        $('#smsReport-btn-search').click(function () {
+            var key = $('#smsReport-search-key').val();
+            var value = $('#smsReport-search-value').val();
+            table.reload('smsReport-table', {where: {searchKey: key, searchValue: value}});
+        });
+    });
+</script>

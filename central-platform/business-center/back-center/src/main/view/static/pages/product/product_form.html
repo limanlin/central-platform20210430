@@ -1,0 +1,85 @@
+<!-- product表单弹窗 -->
+<form id="product-form" lay-filter="product-form" class="layui-form model-form">
+    <input name="id" type="hidden"/>
+    <div class="layui-form-item">
+        <label class="layui-form-label">产品全称</label>
+        <div class="layui-input-block">
+            <input name="fullName" placeholder="请输入产品全称" type="text" class="layui-input" maxlength="20"
+                   lay-verify="required" required/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">产品简称</label>
+        <div class="layui-input-block">
+            <input name="shortName" placeholder="请输入产品简称" type="text" class="layui-input" maxlength="20"
+                   lay-verify="required" required/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">品牌</label>
+        <div class="layui-input-block">
+            <select name="brand" xm-select="brand" lay-verify="required">
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item model-form-footer">
+        <button class="layui-btn layui-btn-primary" ew-event="closeDialog" type="button">取消</button>
+        <button class="layui-btn" lay-filter="product-form-submit" lay-submit>保存</button>
+    </div>
+</form>
+
+<script>
+    layui.use(['layer', 'admin', 'form', 'formSelects'], function () {
+        var layer = layui.layer;
+        var admin = layui.admin;
+        var form = layui.form;
+        var formSelects = layui.formSelects;
+        form.render('radio');
+
+        // 获取所有品牌
+        layer.load(2);
+        admin.req('api-user/SysDictionarys/sysDictionarys', {}, function (data) {
+            layer.closeAll('loading');
+            if (0 == data.code) {
+                // 渲染多选下拉框
+                var roleSelectData = new Array();
+                for (var i = 0; i < data.data.length; i++) {
+                    roleSelectData.push({name: data.data[i].name, value: data.data[i].id});
+                }
+                formSelects.data('brand', 'local', {arr: roleSelectData});
+
+                // 回显user数据
+                var product = admin.getTempData('t_product');
+                console.log(product);
+                $('#product-form').attr('method', 'POST');
+                if (product) {
+                    form.val('product-form', product);
+                    $('#product-form').attr('method', 'POST');
+                    var rds = new Array();
+                    for (var i = 0; i < product.roles.length; i++) {
+                        rds.push(product.roles[i].id);
+                    }
+                    formSelects.value('brand', rds);
+                }
+
+            } else {
+                layer.msg('获取品牌失败', {icon: 2});
+            }
+        }, 'GET');
+
+        // 表单提交事件
+        form.on('submit(product-form-submit)', function (data) {
+            layer.load(2);
+            admin.req('api-user/products/saveOrUpdate', JSON.stringify(data.field), function (data) {
+                layer.closeAll('loading');
+                if (data.resp_code == 0) {
+                    layer.msg(data.resp_msg, {icon: 1});
+                    admin.finishPopupCenter();
+                } else {
+                    layer.msg(data.resp_msg, {icon: 2});
+                }
+            }, $('#user-form').attr('method'));
+            return false;
+        });
+    });
+</script>

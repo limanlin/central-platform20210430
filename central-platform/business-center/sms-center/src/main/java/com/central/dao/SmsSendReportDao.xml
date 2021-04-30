@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.central.dao.SmsSendReportDao">
+    <sql id="where">
+        <where>
+            <if test="userCode != null and userCode != ''">
+                and t.userCode = #{userCode}
+            </if>
+            <if test="sysName != null and sysName != ''">
+                and t.sysName like concat('%', #{sysName}, '%')
+            </if>
+            <!-- 搜索条件 -->
+            <if test="searchKey != null and searchKey != '' and searchKey=='userCode'">
+                and t.userCode = #{searchValue}
+            </if>
+            <if test="searchKey != null and searchKey != '' and searchKey=='sysName'">
+                and t.sysName  like concat('%', #{searchValue}, '%')
+            </if>
+        </where>
+    </sql>
+    <select id="count" resultType="int">
+        select count(*) from v_sms_report t
+        <include refid="where" />
+    </select>
+    <select id="smsReportList" resultType="com.central.model.sms.SmsSendReport">
+        select * from v_sms_report t
+        <include refid="where" />
+        order by t.sysName
+
+        <if test="page != null and page >= 0 and limit != null and limit > 0">
+            limit #{page},#{limit}
+        </if>
+    </select>
+</mapper>

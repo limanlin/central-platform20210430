@@ -1,0 +1,50 @@
+<!-- 短信每日发送统计 -->
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">每日统计报表</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>每日统计报表</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            系统名称：            &emsp;
+            <input id="sysName" name="sysName" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <button id="smsStat-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+        </div>
+
+        <table class="layui-table" id="smsStat-table" lay-filter="smsStat-table"></table>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table', 'config'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        // 渲染表格
+        table.render({
+            elem: '#smsStat-table',
+            url: config.base_server + 'api-sms/smsStats',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {field: 'sysName', sort: true, title: '系统名称'},
+                {field: 'userCode', sort: true, title: '系统编码'},
+                {field: 'statDate', sort: true, title: '发送日期'},
+                {field: 'totalNum', sort: true, title: '发送短信数量'},
+                {field: 'alarmTime', sort: true, title: '下次预警时间'},
+            ]]
+        });
+        // 搜索按钮点击事件
+        $('#smsStat-btn-search').click(function () {
+            var key = $('#sysName').val();
+            var value = $('#sysName').val();
+            table.reload('smsStat-table', {where: {searchKey: key, searchValue: value}});
+        });
+    });
+</script>

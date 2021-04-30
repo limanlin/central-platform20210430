@@ -1,0 +1,114 @@
+<!-- 短信请求记录列表 -->
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h2 class="header-title">请求记录</h2>
+        <span class="layui-breadcrumb pull-right">
+          <a href="#!console">首页</a>
+          <a><cite>请求记录</cite></a>
+        </span>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form toolbar">
+            搜索：
+            <select id="smsRequest-search-key" lay-filter="itpow">
+                <option value="">-请选择-</option>
+                <option value="userName">用户名</option>
+                <option value="phone">手机号</option>
+                <option value="content">短信内容</option>
+                <option value="ipAddress">IP地址</option>
+                <option value="sendTime">请求时间</option>
+            </select>&emsp;
+            <input id="smsRequest-search-value" class="layui-input search-input" type="text" placeholder="输入关键字"/>&emsp;
+            <input id="smsRequest-search-star" class="layui-input search-input" type="text" placeholder="输入开始时间" style="display: none"/>
+            <input id="smsRequest-search-end" class="layui-input search-input" type="text" placeholder="输入结束时间" style="display: none"/>
+            <button id="smsRequest-btn-search" class="layui-btn icon-btn"><i class="layui-icon">&#xe615;</i>搜索</button>
+        </div>
+
+        <table class="layui-table" id="smsRequest-table" lay-filter="smsRequest-table"></table>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="smsRequest-table-bar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">查看</a>
+</script>
+<script>
+    layui.use(['form', 'table', 'util', 'config', 'admin', 'formSelects'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var config = layui.config;
+        var layer = layui.layer;
+        var util = layui.util;
+        var admin = layui.admin;
+        var formSelects = layui.formSelects;
+        // 渲染表格
+        table.render({
+            elem: '#smsRequest-table',
+            url: config.base_server + 'api-sms/smsRequests',
+            method: 'GET',
+            where: {
+                access_token: config.getToken().access_token
+            },
+            page: true,
+            cols: [[
+                {field: 'userName', sort: true, title: '用户名'},
+                {field: 'phone', sort: true, title: '手机号'},
+                {field: 'content', sort: true, title: '短信内容'},
+                {field: 'ipAddress', sort: true, title: 'Ip地址'},
+                {
+                    sort: true, templet: function (d) {
+                        return util.toDateString(d.sendTime);
+                    }, title: '请求时间'
+                },
+                {align: 'center', toolbar: '#smsRequest-table-bar', title: '操作'}
+            ]]
+        });
+
+        // 工具条点击事件
+        table.on('tool(smsRequest-table)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') { //修改
+                showEditModel(data);
+            }
+        });
+
+        //显示表单弹窗
+        var showEditModel = function (data) {
+            if (data){
+                data.status = data.status.toString();
+            }
+            admin.putTempData('t_smsRequests', data);
+            var title = '查看信息';
+            admin.popupCenter({
+                title: title,
+                //area: ['880px', '800px'],
+                path: 'pages/sms/smsRequestForm.html',
+                finish: function () {
+                    table.reload('smsRequest-table', {});
+                }
+            });
+        };
+
+        // 搜索按钮点击事件
+        $('#smsRequest-btn-search').click(function () {
+            var key = $('#smsRequest-search-key').val();
+            var value = $('#smsRequest-search-value').val();
+            table.reload('smsRequest-table', {where: {searchKey: key, searchValue: value}});
+        });
+        //选择下拉框时触发
+        formSelects.onChange(
+            function (){
+                var key = $('#smsRequest-search-key').val();
+                alert(key);
+                if(key=='sendTime'){
+                    $('#smsRequest-search-value').css('display','none');
+                    $('#smsRequest-search-star').css('display','block');
+                    $('#smsRequest-search-end').css('display','block');
+                }else{
+                    $('#smsRequest-search-value').css('display','block');
+                    $('#smsRequest-search-star').css('display','none');
+                    $('#smsRequest-search-end').css('display','none');
+                }
+            }
+        );
+    });
+</script>
