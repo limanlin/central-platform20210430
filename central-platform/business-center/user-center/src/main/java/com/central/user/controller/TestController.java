@@ -2,7 +2,7 @@ package com.central.user.controller;
 
 import javax.annotation.Resource;
 
-import com.central.util.MD5Util;
+//import com.central.util.MD5Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,13 +18,15 @@ import java.util.Date;
 @RestController
 public class TestController {
 	private static final Logger logger = LoggerFactory.getLogger(TestController.class);
-	
+
 	@GetMapping("/test111")
 	public String hello() {
-		String userName="younihanshi";
-		long time=new Date().getTime();
-		return MD5Util.getMD5(userName+time);
+		String userName = "younihanshi";
+		long time = new Date().getTime();
+//		return MD5Util.getMD5(userName+time);
+	return  null;
 	}
+
 
 	 
 }

@@ -20,14 +20,14 @@ spring:
     druid: 
       # JDBC 配置(驱动类自动从url的mysql识别,数据源类型自动识别)
       core:
-        url: jdbc:mysql://127.0.0.1:3366/oauth-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+        url: jdbc:mysql://127.0.0.1:3306/oauth-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
         username: root
-        password: xolo@SEED
+        password: root
         driver-class-name:  com.mysql.jdbc.Driver
       log:
-        url: jdbc:mysql://127.0.0.1:3366/log-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+        url: jdbc:mysql://127.0.0.1:3306/log-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
         username: root
-        password: xolo@SEED
+        password: root
         driver-class-name:  com.mysql.jdbc.Driver   
       #连接池配置(通常来说，只需要修改initialSize、minIdle、maxActive
       initial-size: 1

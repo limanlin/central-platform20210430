@@ -26,8 +26,8 @@
     <module>product-center</module>
       <!-- 会员中心 -->
       <module>member-center</module>
-      <module>sms-center</module>
-      <module>xolo-kongjia</module>
+<!--      <module>sms-center</module>-->
+<!--      <module>xolo-kongjia</module>-->
 
   </modules>
 </project>

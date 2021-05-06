@@ -140,12 +140,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!--钉钉工具包-->
-        <dependency>
-            <groupId>com.dingtalk.api</groupId>
-            <artifactId>top-api-sdk-dev</artifactId>
-            <version>ding-open-mc-SNAPSHOT</version>
-        </dependency>
 
     </dependencies>
 
